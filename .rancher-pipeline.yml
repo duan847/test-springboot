@@ -1,0 +1,26 @@
+stages:
+- name: compile
+  steps:
+  - runScriptConfig:
+      image: maven:3-jdk-8-alpine
+      shellScript: mvn clean package
+- name: publish
+  steps:
+  - publishImageConfig:
+      dockerfilePath: ./Dockerfile
+      buildContext: .
+      tag: registry.howdohr.com/testspringboot:${CICD_EXECUTION_SEQUENCE}
+      pushRemote: true
+      registry: registry.howdohr.com
+    env:
+      PLUGIN_DAEMON_OFF: true
+      DOCKER_HOST: tcp://dind.default:2375
+      PLUGIN_DEBUG: "true"
+      PLUGIN_INSECURE: "true"
+- name: deploy
+  steps:
+  - applyYamlConfig:
+      path: ./deployment.yaml
+timeout: 60
+branch: {}
+
